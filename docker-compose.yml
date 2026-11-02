@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: markytics_postgres
+    environment:
+      POSTGRES_DB: markytics_db
+      POSTGRES_USER: markytics_user
+      POSTGRES_PASSWORD: markytics_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U markytics_user -d markytics_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: markytics_backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed_demo_data &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_DB: markytics_db
+      POSTGRES_USER: markytics_user
+      POSTGRES_PASSWORD: markytics_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      DJANGO_SECRET_KEY: "production-markytics-secret-key-change-in-production"
+      DEBUG: "False"
+    volumes:
+      - resume_storage:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  email_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: markytics_email_worker
+    command: python manage.py process_email_outbox
+    environment:
+      POSTGRES_DB: markytics_db
+      POSTGRES_USER: markytics_user
+      POSTGRES_PASSWORD: markytics_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    depends_on:
+      backend:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: markytics_mailpit
+    ports:
+      - "8025:8025" # Mailpit Web Inspector UI
+      - "1025:1025" # Local SMTP capture port
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: markytics_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+
+volumes:
+  postgres_data:
+  resume_storage:

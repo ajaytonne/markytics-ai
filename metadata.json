@@ -1,0 +1,6 @@
+{
+  "name": "Markytics Job Portal & Recruitment Management System",
+  "description": "A full-stack job portal and recruitment management platform for Markytics Consulting Pvt Ltd with role-based access, candidate application tracking, recruiter applicant review pipelines, private resume management, and admin dashboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
