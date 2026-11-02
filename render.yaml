@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: markytics-ai
+    runtime: node
+    plan: free
+    buildCommand: npm install --no-package-lock && npm --prefix frontend install --no-save --no-package-lock && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health/
+    envVars:
+      - key: NODE_ENV
+        value: production

@@ -216,3 +216,7 @@ Tests cover:
 2. **Cookies**: Set `CSRF_COOKIE_SECURE=True` and `SESSION_COOKIE_SECURE=True` when running behind HTTPS.
 3. **Malware Scanning**: In production, pass uploaded resume PDFs through an antivirus service (e.g. ClamAV) prior to storing in media volume.
 4. **Rate Limiting**: Enable Django REST Framework throttling (`ScopedRateThrottle`) on sensitive login and password reset endpoints.
+
+## 10. Free Render Demo
+
+The [`render.yaml`](./render.yaml) Blueprint deploys the interactive Express preview server and production-built React frontend as a single free web service. This demo uses in-memory sample data; accounts, jobs, and applications are not durable and may reset when the service restarts. It does not run the Django/PostgreSQL backend. Render's free service may also spin down when idle. Use persistent database and file storage for production data.
